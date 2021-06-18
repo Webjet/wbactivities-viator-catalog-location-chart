@@ -1,0 +1,22 @@
+replicaCount: 1
+image:
+  repository: webbeds.azurecr.io/destination-services/wbactivities-viator-catalog-location
+  tag: 1.0.0-dev
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+- name: registrykey
+cronSchedule: '0 * * * *'
+nameOverride: ""
+fullnameOverride: ""
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+aspnet_environment: Development
+syncronizer_process_disabled: true
+vault:
+  enabled: true
+  role: dev-destination-services-wbactivities-viator-catalog-location
+  secrets:
+  - path: /dev/destination-services/wbactivities-viator-catalog-location/appsettings.secrets.json
+    filename: appsettings.secrets.json

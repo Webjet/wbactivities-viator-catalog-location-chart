@@ -1,0 +1,56 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "wbactivities-viator-catalog-location.name" . }}
+  labels:
+{{ include "wbactivities-viator-catalog-location.labels" . | indent 4 }}
+spec:
+  concurrencyPolicy: Forbid
+  schedule: '{{ .Values.cronSchedule }}'
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          {{- if .Values.vault.enabled }}
+          annotations:
+            vault.hashicorp.com/agent-inject: "true"
+            vault.hashicorp.com/agent-init-first : "true"
+            vault.hashicorp.com/agent-pre-populate-only : "true"
+            vault.hashicorp.com/role: "{{ .Values.vault.role }}"
+            {{- range .Values.vault.secrets }}
+            vault.hashicorp.com/agent-inject-secret-{{ .filename }}: "{{ .path }}"
+            vault.hashicorp.com/agent-inject-template-{{ .filename }}: |
+              {{`{{- with secret "`}}{{ .path }}{{`" -}}
+              {{- .Data.data | toJSON }}
+              {{- end }}`}}
+            {{- end }}
+          {{- end }}
+        spec:
+        {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+          containers:
+          - name: {{ .Chart.Name }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            env:
+              - name: DOTNET_ENVIRONMENT
+                value: "{{ .Values.aspnet_environment }}"
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+          restartPolicy: "OnFailure"
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 10}}
+        {{- end }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
