@@ -1,0 +1,1 @@
+# wbactivities-viator-catalog-location-chart
