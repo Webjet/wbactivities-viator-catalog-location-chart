@@ -1,11 +1,11 @@
 replicaCount: 1
 image:
   repository: webbeds.azurecr.io/destination-services/wbactivities-viator-catalog-location
-  tag: 1.0.0
+  tag: 1.0.0-1
   pullPolicy: IfNotPresent
 imagePullSecrets:
 - name: registrykey
-cronSchedule: '0 * * * *'
+cronSchedule: 0 * * * *
 nameOverride: ""
 fullnameOverride: ""
 resources: {}
